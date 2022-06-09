@@ -1,5 +1,5 @@
 from pathlib import Path
-from my_settings import SECRET_KEY, DATABASES, ALGORITHM
+from my_settings import SECRET_KEY, DATABASES, ALGORITHM, CLIENT_ID
 
 import pymysql
 
@@ -11,6 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = SECRET_KEY
 
 ALGORITHM = ALGORITHM
+
+CLIENT_ID = CLIENT_ID
 
 DEBUG = True
 
@@ -117,3 +119,22 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGGING = {
+    'disable_existing_loggers': False,
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
