@@ -1,5 +1,4 @@
-import jwt
-import requests
+import jwt, requests, boto3, uuid, json
 
 
 from django.http import JsonResponse
@@ -8,9 +7,10 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.db import transaction
 
-from users.models import SocialAccount, User, Subscription
+from users.models import SocialAccount, User
 from core.utils import login_decorator
-from authors.models import Author, InterestedAuthor
+from core.views import upload_fileobj, object_delete
+from authors.models import Author
 
 class KakaoLoginView(View):
     def get(self, request):
@@ -79,3 +79,33 @@ class UserDetailView(View):
             return JsonResponse({"message":"DoesNotExist"}, status = 401)  
         except KeyError:
             return JsonResponse({"message":"KEY ERROR"}, status = 400)    
+
+class ProfileUpdate(View):
+    @login_decorator
+    def post(self, request):
+        name        = request.POST.get('name')
+        description = request.POST.get('description')
+        image       = request.FILES.get("image")
+
+        if not str(image).split('.')[-1] in ['png', 'jpg', 'gif', 'jpeg']:
+            return JsonResponse({"message":"INVALID EXTENSION"}, status = 400)
+
+        user = request.user
+        
+        if user.thumbnail.find(settings.AWS_STORAGE_BUCKET_NAME) != -1:
+            key = user.thumbnail.split("amazonaws.com/")[-1]
+            object_delete(Key=key)
+        
+        image._set_name(str(uuid.uuid4()))        
+        
+        upload_fileobj(Fileobj=image, Key = "profile/"+str(image), ExtraArgs=None)
+        
+        bucket_object_name = settings.IMAGE_URL+"profile/"+str(image)
+        
+        user = request.user
+        user.name        = name
+        user.description = description
+        user.thumbnail   = bucket_object_name
+        user.save()
+
+        return JsonResponse({"message": "CREATE"}, status = 201)
