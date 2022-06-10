@@ -14,7 +14,7 @@ class User(TimeStampedModel):
 class SocialAccount(TimeStampedModel):
     social_account_id = models.CharField(max_length=300)
     name              = models.CharField(max_length=50)
-    uesr              = models.ForeignKey(User, on_delete=models.CASCADE)
+    user              = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'social_accounts'

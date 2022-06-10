@@ -29,11 +29,14 @@ class WorkLike(models.Model):
         db_table = "work_likes"
 
 class Post(TimeStampedModel):
-    thumbnail    = models.CharField(max_length=150)
-    content      = models.TextField()
-    reading_time = models.TimeField()
-    work         = models.ForeignKey(Work, on_delete = models.CASCADE)
-    user         = models.ForeignKey(User, on_delete = models.CASCADE)
+    title           = models.CharField(max_length=150)
+    sub_title       = models.CharField(max_length=150)
+    thumbnail_image = models.CharField(max_length=150)
+    content         = models.TextField()
+    reading_time    = models.TimeField()
+    work            = models.ForeignKey(Work, on_delete = models.CASCADE, null=True)
+    user            = models.ForeignKey(User, on_delete = models.CASCADE)
+    subcategory     = models.ForeignKey('SubCategory', on_delete = models.CASCADE)
 
     class Meta:
         db_table = "posts"
@@ -63,7 +66,6 @@ class MainCategory(models.Model):
 class SubCategory(models.Model):
     name         = models.CharField(max_length=45)
     maincategory = models.ForeignKey(MainCategory, on_delete = models.CASCADE)
-    post         = models.ForeignKey(Post, on_delete = models.CASCADE)
 
     class Meta:
         db_table = "subcategories"
