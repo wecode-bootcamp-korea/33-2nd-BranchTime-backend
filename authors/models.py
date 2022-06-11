@@ -18,12 +18,12 @@ class Site(models.Model):
     class Meta:
         db_table = 'sites'
 
-class Subscription(models.Model):
+class InterestedAuthor(models.Model):
     user   = models.ForeignKey(User, on_delete=models.CASCADE)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'subscriptions'
+        db_table = 'interested_authors'
 
 class ProposalObject(models.Model):
     name = models.CharField(max_length=30)        
