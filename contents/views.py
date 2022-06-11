@@ -6,8 +6,10 @@ from django.http     import JsonResponse
 
 from    core.views          import upload_fileobj
 from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
+from    botocore.exceptions import ClientError
 from    core.utils          import login_decorator
-from    contents.models     import Post, SubCategory, Comment
+from    contents.models     import Post, SubCategory, User, Comment
+import  boto3
 
 bucket = AWS_STORAGE_BUCKET_NAME
 args   = {'ACL':'public-read'}
@@ -74,10 +76,29 @@ class PostUploadView(View):
                 thumbnail_image = thumbnail_image,
                 title           = title,
                 reading_time    = reading_time,
->>>>>>> bcf0e69 ([FEAT] 글쓰기 기능 추가)
             )
 
             return JsonResponse({'message' : "SUCCESS"}, status=201)
+
+        except KeyError :
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+class ContentImageUploadView(View):
+    @login_decorator
+    def post(self, request):
+        try:
+            content_image = request.FILES['content_image']
+            print(content_image)
+            if not str(content_image).split('.')[-1] in ['png', 'jpg', 'gif', 'jpeg']:
+                return JsonResponse({"message" : "INVALID EXTENSION"}, status=400)
+
+            key = "content_image/" + str(request.user.id) + "/" + str(content_image)
+
+            upload_fileobj(Fileobj=content_image, Bucket=bucket, Key=key, ExtraArgs=args)
+
+            bucket_object_name = MEDIA_URL + key
+            
+            return JsonResponse({'message' : bucket_object_name}, status=201)
 
         except KeyError :
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
