@@ -7,6 +7,7 @@ class User(TimeStampedModel):
     email        = models.CharField(max_length=50)
     thumbnail    = models.CharField(max_length=300)
     introduction = models.TextField()
+    subscription = models.ManyToManyField('self', symmetrical=False, through='Subscription')
     
     class Meta:
         db_table = 'users'
@@ -18,4 +19,13 @@ class SocialAccount(TimeStampedModel):
 
     class Meta:
         db_table = 'social_accounts'
+
+
+class Subscription(models.Model):
+    subscriber      = models.ForeignKey(User, related_name='subscriber', on_delete=models.CASCADE)
+    subscribed_user = models.ForeignKey(User, related_name='subscribed_user', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'subscription'
+
 
