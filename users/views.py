@@ -1,13 +1,13 @@
 import jwt
 import requests
 
-from django.http import JsonResponse
-from django.views import View
-from django.shortcuts import redirect
-from django.conf import settings
-from django.db import transaction
+from django.http        import JsonResponse
+from django.views       import View
+from django.shortcuts   import redirect
+from django.conf        import settings
+from django.db          import transaction
 
-from users.models import SocialAccount, User
+from users.models       import SocialAccount, User
 
 class KakaoLoginView(View):
     def get(self, request):
