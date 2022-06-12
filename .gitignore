@@ -253,4 +253,6 @@ zsdoc/data
 
 # End of https://www.toptal.com/developers/gitignore/api/python,zsh,macos,visualstudiocode
 
+credentials.json
+token.json
 my_settings.py
