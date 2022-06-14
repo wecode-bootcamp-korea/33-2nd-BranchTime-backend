@@ -4,6 +4,7 @@ import datetime
 from django.views           import View
 from django.http            import JsonResponse
 from django.db.models.query import QuerySet
+from django.shortcuts       import get_object_or_404
 
 from    core.views          import upload_fileobj
 from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
@@ -137,8 +138,16 @@ class ContentImageUploadView(View):
         except KeyError :
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
+    @login_decorator
+    def delete(self, request, comment_id):
+        try:
+            comment = get_object_or_404(Comment, id=comment_id)
+            comment.delete()
 
+            return JsonResponse({'message' : "SUCCESS"}, status=204)
 
-            
+        except KeyError :
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
 
 
