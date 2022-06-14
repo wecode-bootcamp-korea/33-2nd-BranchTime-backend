@@ -1,12 +1,13 @@
 import json
 import datetime
+import requests
 
 from django.views           import View
 from django.http            import JsonResponse
 from django.db.models.query import QuerySet
 from django.shortcuts       import get_object_or_404
 
-from    core.views          import upload_fileobj
+from    core.views          import upload_fileobj, delete_object
 from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
 from    botocore.exceptions import ClientError
 from    core.utils          import login_decorator
@@ -150,4 +151,34 @@ class ContentImageUploadView(View):
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
 
+
+class CommentView(View):
+    @login_decorator
+    def post(self, request, comment_id):
+        try:
+            content = request.POST.get('content', None)
+            image   = request.FILES.get('image', None)
+            comment = get_object_or_404(Comment, id=comment_id)
+
+            if image is not None:
+                KEY = comment.image.split("amazonaws.com/")[-1]
+                key = str(KEY) 
+                delete_object(Bucket = bucket, Key=key)
+           
+                key = "comment_image/" + str(comment.post_id) + "/" + str(image) 
+                print(key)
+                upload_fileobj(Fileobj = image, Bucket=bucket, Key=key, ExtraArgs=args)
+            
+                image_url     = MEDIA_URL + key
+                comment.image = image_url
+
+            if content is not None:
+                comment.content = content
+
+            comment.save()
+
+            return JsonResponse({'message' : "SUCCESS"}, status=200)
+
+        except KeyError :
+                return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
