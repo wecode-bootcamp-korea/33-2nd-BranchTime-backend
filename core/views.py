@@ -15,6 +15,7 @@ def upload_fileobj(Fileobj, Key, ExtraArgs, Callback=None, Config=None):
         logging.error(e)
         return False
 
+<<<<<<< HEAD
     return True     
 
 def object_delete(Key):
@@ -27,3 +28,14 @@ def object_delete(Key):
         logging.error(e)
         return False
     return True
+=======
+    return True
+
+def delete_object(Bucket, Key):
+    try:
+        client.delete_object(Bucket=bucket, Key=Key)
+
+    except ClientError as e:
+        logging.error(e)
+        return False
+>>>>>>> 1d2653a ([FEAT] 댓글수정 기능)
