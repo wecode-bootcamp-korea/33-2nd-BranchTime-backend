@@ -7,4 +7,5 @@ urlpatterns = [
     path("/", PostUploadView.as_view()),
     path("/media", ContentImageUploadView.as_view()), 
     path("/<int:post_id>", PostView.as_view()),
+    path("/comment/<int:comment_id>", CommentUploadView.as_view())
 ]
