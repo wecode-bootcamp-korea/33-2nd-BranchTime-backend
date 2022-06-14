@@ -1,14 +1,15 @@
 import json
 import datetime
 
-from django.views    import View
-from django.http     import JsonResponse
+from django.views           import View
+from django.http            import JsonResponse
+from django.db.models.query import QuerySet
 
 from    core.views          import upload_fileobj
 from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
 from    botocore.exceptions import ClientError
 from    core.utils          import login_decorator
-from    contents.models     import Post, SubCategory, User, Comment
+from    contents.models     import Post, SubCategory, User, Comment, PostLike
 import  boto3
 
 bucket = AWS_STORAGE_BUCKET_NAME
@@ -83,6 +84,39 @@ class PostUploadView(View):
         except KeyError :
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
+class PostView(View):
+    def get(self, request, post_id):
+        try:
+            results = []
+            post = Post.objects.prefetch_related('postlike_set','comment_set').select_related('user','subcategory').get(id = post_id)
+            comments = post.comment_set.all()
+            comment = [{
+                'user_name'      : comment.user.name,
+                'comment_image'  : comment.image,
+                'comment_content': comment.content,
+            } for comment in comments]
+            
+            results.append({
+                'comment_information'    : comment,
+                'post_title'             : post.title,
+                'post_subtitle'          : post.sub_title,
+                'post_subcategory_name'  : post.subcategory.name,
+                'post_user_name'         : post.user.name,
+                'post_created_at'        : post.created_at.strftime("%b.%d.%Y"),
+                'post_content'           : post.content,
+                'post_like_count'        : post.postlike_set.count(),
+                'post_thumbnail_image'   : post.thumbnail_image,
+                'user_name'              : post.user.name,
+                'user_thumbnail'         : post.user.thumbnail,
+                'user_introduction'      : post.user.introduction,
+                'user_subscription_count': post.user.subscription.all().count()
+            })
+
+            return JsonResponse({'message' : results }, status=200)
+
+        except KeyError :
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
 class ContentImageUploadView(View):
     @login_decorator
     def post(self, request):
@@ -102,3 +136,9 @@ class ContentImageUploadView(View):
 
         except KeyError :
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+
+
+            
+
+
