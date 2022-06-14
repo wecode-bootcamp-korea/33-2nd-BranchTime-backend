@@ -1,13 +1,16 @@
 import jwt
 import requests
 
-from django.http        import JsonResponse
-from django.views       import View
-from django.shortcuts   import redirect
-from django.conf        import settings
-from django.db          import transaction
 
-from users.models       import SocialAccount, User
+from django.http import JsonResponse
+from django.views import View
+from django.shortcuts import redirect
+from django.conf import settings
+from django.db import transaction
+
+from users.models import SocialAccount, User, Subscription
+from core.utils import login_decorator
+from authors.models import Author, InterestedAuthor
 
 class KakaoLoginView(View):
     def get(self, request):
@@ -48,5 +51,31 @@ class KakaoLoginView(View):
                         )
                 access_token = jwt.encode({'id':user.id}, settings.SECRET_KEY, settings.ALGORITHM)  
                 return JsonResponse({"token":access_token}, status = 200)
+        except KeyError:
+            return JsonResponse({"message":"KEY ERROR"}, status = 400)    
+
+class UserDetailView(View):
+    @login_decorator
+    def get(self, request):
+        try : 
+            user = User.objects.get(id=request.user.id)
+            author = Author.objects.filter(user_id = user.id)
+            user_detail = {
+                            "id"              : user.id,
+                            "name"            : user.name,
+                            "description"     : user.introduction,
+                            "avatar"          : user.thumbnail,
+                            "subscriber"      : user.subscription.all().count(),
+                            "interestedAuthor": user.interestedauthor_set.all().count(),
+                    }
+
+            if author.exists():
+                user_detail["description"] = user.author.introduction
+                user_detail['career']      = user.author.career
+            
+            return JsonResponse({"user_detail" : user_detail}, status = 200)
+
+        except User.DoesNotExist:
+            return JsonResponse({"message":"DoesNotExist"}, status = 401)  
         except KeyError:
             return JsonResponse({"message":"KEY ERROR"}, status = 400)    
