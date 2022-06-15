@@ -48,6 +48,25 @@ class CommentUploadView(View):
             
 class PostUploadView(View):
     @login_decorator
+    def get(self, request):
+        try:
+            categories = MainCategory.objects.prefetch_related('subcategory_set').all()
+
+            results = [{
+                'id'  : category.id,
+                'main_category_name': category.name,
+                'sub_category' : [{
+                    'id': subcategory.id,
+                    'name': subcategory.name
+                }for subcategory in category.subcategory_set.all()]
+            } for category in  categories]
+
+            return JsonResponse({'message' : results }, status=200)
+
+        except KeyError :
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+        
+    @login_decorator
     def post(self, request):
         try:
             content         = request.POST["content"]
