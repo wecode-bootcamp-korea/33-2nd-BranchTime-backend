@@ -115,6 +115,7 @@ class PostView(View):
                 'user_name'      : comment.user.name,
                 'comment_image'  : comment.image,
                 'comment_content': comment.content,
+                'comment_id'     : comment.id
             } for comment in comments]
             
             results.append({
