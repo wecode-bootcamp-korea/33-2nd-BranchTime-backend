@@ -1,6 +1,7 @@
 import json
 import datetime
 import requests
+import boto3
 
 from django.views           import View
 from django.http            import JsonResponse
@@ -12,7 +13,7 @@ from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
 from    botocore.exceptions import ClientError
 from    core.utils          import login_decorator
 from    contents.models     import Post, SubCategory, User, Comment, PostLike, MainCategory
-import  boto3
+
 
 bucket = AWS_STORAGE_BUCKET_NAME
 args   = {'ACL':'public-read'}
@@ -190,6 +191,7 @@ class CommentView(View):
         except KeyError :
                 return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
+
     @login_decorator
     def delete(self, request, comment_id):
         try:
@@ -202,3 +204,37 @@ class CommentView(View):
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
 
+
+class PostListView(View):
+    def get(self, request, maincategory_id):
+        try:
+            main = MainCategory.objects.get(id = maincategory_id)
+            subcategory_lists = main.subcategory_set.all()
+            list ={ 
+                "title_list":{
+                    "main_id"  : main.id,
+                    "main_title": main.name
+                    },
+                "sub_title":[{
+                    "sub_id"  : subcategory_list.id,
+                    "sub_title": subcategory_list.name,
+                    } for subcategory_list in subcategory_lists],
+                "post_list":[[{
+                    "post_id"      : post.id,
+                    "post_title"   : post.title,
+                    "post_subTitle": post.sub_title,
+                    "desc"         : post.content,
+                    "commentCount" : post.comment_set.all().count(),
+                    "writeTime"    : post.reading_time,
+                    "writeUser"    : post.user.name,
+                    "imgSrc"       : post.thumbnail_image,
+                    } for post in Post.objects.select_related("user").filter(subcategory_id=subcategory_list.id)] for subcategory_list in subcategory_lists]
+                    }
+            
+            return JsonResponse({"post_list":list}, status = 200)
+
+        except MainCategory.DoesNotExist:
+            return JsonResponse({"message":"DoesNotExist"}, status = 401)  
+        
+        except KeyError:
+            return JsonResponse({"message":"KEY ERROR"}, status = 400)        

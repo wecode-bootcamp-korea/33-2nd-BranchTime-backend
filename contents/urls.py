@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views      import CommentUploadView, PostUploadView, ContentImageUploadView, PostView, CommentView
+from .views import CommentUploadView, PostUploadView, ContentImageUploadView, PostView, CommentView,PostListView
 
 urlpatterns = [
     path("/<int:post_id>/comment", CommentUploadView.as_view()),
@@ -10,4 +10,5 @@ urlpatterns = [
     path("/commentupload/<int:comment_id>", CommentUploadView.as_view()),
     path("/<int:post_id>/comment", CommentUploadView.as_view()),
     path("/comment/<int:comment_id>", CommentView.as_view()),
+    path("/postlist/<int:maincategory_id>", PostListView.as_view()),
 ]
