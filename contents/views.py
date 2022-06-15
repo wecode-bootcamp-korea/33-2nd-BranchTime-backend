@@ -1,6 +1,7 @@
 import json
 import datetime
 import requests
+import boto3
 
 from django.views           import View
 from django.http            import JsonResponse
@@ -11,8 +12,8 @@ from    core.views          import upload_fileobj, delete_object
 from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
 from    botocore.exceptions import ClientError
 from    core.utils          import login_decorator
-from    contents.models     import Post, SubCategory, User, Comment, PostLike
-import  boto3
+from    contents.models     import Post, SubCategory, User, Comment, PostLike, MainCategory
+
 
 bucket = AWS_STORAGE_BUCKET_NAME
 args   = {'ACL':'public-read'}
@@ -202,3 +203,31 @@ class CommentView(View):
         except KeyError :
                 return JsonResponse({"message" : "KEY_ERROR"}, status=400)
 
+
+class PostListView(View):
+    def get(self, request, maincategory_id):
+
+        main = MainCategory.objects.get(id = maincategory_id)
+        subcategory_lists = main.subcategory_set.all()
+        title_list ={
+            "title" : main.name,
+            "sub_title": [{
+                'id' : subcategory_list.id,
+                'name':subcategory_list.name,
+                    } for subcategory_list in subcategory_lists]
+        }
+
+        post_list = [[{
+            "id"          : post.id,
+            "title"       : post.title,
+            "subTitle"    : post.sub_title,
+            "desc"        : post.content,
+            "commentCount": post.comment_set.all().count(),
+            "writeTime"   : post.reading_time,
+            "writeUser"   : post.user.name,
+            "imgSrc"      : post.thumbnail_image,
+            } 
+            for post in Post.objects.select_related("user").filter(subcategory_id=subcategory_list.id)] 
+                for subcategory_list in subcategory_lists]
+        
+        return JsonResponse({"title_list":title_list, "post_list":post_list}, status = 200)
