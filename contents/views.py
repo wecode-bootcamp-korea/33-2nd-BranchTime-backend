@@ -11,7 +11,7 @@ from    core.views          import upload_fileobj, delete_object
 from    my_settings         import MEDIA_URL, AWS_STORAGE_BUCKET_NAME
 from    botocore.exceptions import ClientError
 from    core.utils          import login_decorator
-from    contents.models     import Post, SubCategory, User, Comment, PostLike
+from    contents.models     import Post, SubCategory, User, Comment, PostLike, MainCategory
 import  boto3
 
 bucket = AWS_STORAGE_BUCKET_NAME
@@ -131,7 +131,8 @@ class PostView(View):
                 'user_name'              : post.user.name,
                 'user_thumbnail'         : post.user.thumbnail,
                 'user_introduction'      : post.user.introduction,
-                'user_subscription_count': post.user.subscription.all().count()
+                'user_subscription_count': post.user.subscription.all().count(),
+                'post_id'                : post.id
             })
 
             return JsonResponse({'message' : results }, status=200)
@@ -158,19 +159,6 @@ class ContentImageUploadView(View):
 
         except KeyError :
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
-
-    @login_decorator
-    def delete(self, request, comment_id):
-        try:
-            comment = get_object_or_404(Comment, id=comment_id)
-            comment.delete()
-
-            return JsonResponse({'message' : "SUCCESS"}, status=204)
-
-        except KeyError :
-            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
-
-
 
 class CommentView(View):
     @login_decorator
@@ -201,4 +189,16 @@ class CommentView(View):
 
         except KeyError :
                 return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+    @login_decorator
+    def delete(self, request, comment_id):
+        try:
+            comment = get_object_or_404(Comment, id=comment_id)
+            comment.delete()
+
+            return JsonResponse({'message' : "SUCCESS"}, status=204)
+
+        except KeyError :
+            return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
 

@@ -7,9 +7,9 @@ from botocore.exceptions import ClientError
 bucket = settings.AWS_STORAGE_BUCKET_NAME
 client = boto3.client('s3')
 
-def upload_fileobj(Fileobj, Key, ExtraArgs, Callback=None, Config=None):
+def upload_fileobj(Fileobj, Bucket, Key, ExtraArgs, Callback=None, Config=None):
     try:
-        client.upload_fileobj(Fileobj, bucket, Key, ExtraArgs)
+        client.upload_fileobj(Fileobj, Bucket, Key, ExtraArgs)
 
     except ClientError as e:
         logging.error(e)
