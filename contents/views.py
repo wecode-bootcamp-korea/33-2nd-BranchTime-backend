@@ -231,3 +231,30 @@ class PostListView(View):
                 for subcategory_list in subcategory_lists]
         
         return JsonResponse({"title_list":title_list, "post_list":post_list}, status = 200)
+
+
+class PostSubListView(View):
+    def get(self, request, subcategory_id):
+        try:
+            sub = SubCategory.objects.get(id = subcategory_id)
+            
+            sub_title_name ={
+                "title" : sub.name
+            }
+
+            post_list = [{
+                "id"          : post.id,
+                "title"       : post.title,
+                "subTitle"    : post.sub_title,
+                "desc"        : post.content,
+                "commentCount": post.comment_set.all().count(),
+                "writeTime"   : post.reading_time,
+                "writeUser"   : post.user.name,
+                "imgSrc"      : post.thumbnail_image,
+                } 
+                for post in Post.objects.select_related("user").filter(subcategory_id=sub.id)]
+            
+            return JsonResponse({"title_list":sub_title_name, "post_list":post_list}, status = 200)
+        
+        except SubCategory.DoesNotExist:
+            return JsonResponse({"message":"DoesNotExist"}, status = 401)  
