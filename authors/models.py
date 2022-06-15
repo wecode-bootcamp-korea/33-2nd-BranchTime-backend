@@ -7,6 +7,7 @@ class Author(TimeStampedModel):
     introduction = models.TextField()
     career       = models.TextField()
     user         = models.OneToOneField(User, on_delete=models.CASCADE)
+    subcategory  = models.ForeignKey('contents.SubCategory', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'authors'
