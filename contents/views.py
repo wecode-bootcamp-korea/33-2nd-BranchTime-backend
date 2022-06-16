@@ -93,7 +93,7 @@ class PostUploadView(View):
             Post.objects.create(
                 content         = content,
                 user_id         = user.id,
-                subcategory_id  = SubCategory.objects.get(id=1).id,
+                subcategory_id  = SubCategory.objects.get(id=subcategory).id,
                 sub_title       = sub_title,
                 thumbnail_image = thumbnail_image,
                 title           = title,
