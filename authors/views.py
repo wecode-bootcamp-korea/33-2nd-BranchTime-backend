@@ -56,3 +56,21 @@ class AuthorListView(View):
 
         except KeyError :
             return JsonResponse({"message" : "KEY_ERROR"}, status=400)
+
+class AuthorDetailView(View):
+    def get(self, request, author_id):
+        try:
+            authors = Author.objects.get(id = author_id)
+            author_detail = {
+                        "id"              : authors.id,
+                        "name"            : authors.user.name,
+                        "description"     : authors.introduction,
+                        "avatar"          : authors.user.thumbnail,
+                        "subscriber"      : authors.user.subscription.all().count(),
+                        "interestedAuthor": authors.user.interestedauthor_set.all().count(),
+                        }
+
+            return JsonResponse({"author_detail" : author_detail}, status = 200)
+
+        except Author.DoesNotExist:
+            return JsonResponse({"message":"DoesNotExist"}, status = 401)  
