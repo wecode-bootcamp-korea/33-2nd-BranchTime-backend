@@ -256,3 +256,4 @@ zsdoc/data
 credentials.json
 token.json
 my_settings.py
+decorators.py
