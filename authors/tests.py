@@ -2,9 +2,8 @@ import json
 import bcrypt
 import jwt
 
-from django.test import TestCase, Client
-from json        import dumps
-from django.conf import settings
+from django.test        import TestCase, Client
+from django.conf        import settings
 
 from users.models       import Subscription
 from authors.models     import Author, User, ProposalObject, Proposal, InterestedAuthor
@@ -63,7 +62,6 @@ class ProposalTest(TestCase):
             "sender_email"      : "dno06101@naver.com",
             "proposal_object_id": 1
         }
-        # self.token = jwt.encode({'id':1}, settings.SECRET_KEY, settings.ALGORITHM)
         headers = {"HTTP_Authorization":self.token}
         
         class MockedResponse:
@@ -79,7 +77,6 @@ class ProposalTest(TestCase):
         mocked_requests.return_value = MockedResponse()
         
         response = client.post('/authors/1/proposal', json.dumps(data), content_type='application/json', **headers)
-        print(response)
         self.assertEqual(response.status_code, 201)
 
     @patch("utils.google_email_api.GoogleEmail")

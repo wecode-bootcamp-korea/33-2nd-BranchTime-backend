@@ -4,7 +4,7 @@ from django.views    import View
 from django.http     import JsonResponse
 
 from googleapiclient.errors         import HttpError
-from core.utils                     import login_decorator
+from utils.login_decorator          import login_decorator
 from authors.models                 import Author, Proposal, ProposalObject
 from contents.models                import SubCategory
 from google.oauth2.credentials      import Credentials
