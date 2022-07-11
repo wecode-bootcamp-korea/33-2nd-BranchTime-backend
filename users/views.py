@@ -1,16 +1,15 @@
-import jwt, requests, boto3, uuid, json
+import jwt, requests, uuid
 
+from django.views          import View
+from django.conf           import settings
+from django.db             import transaction
+from django.http           import JsonResponse
 
-from django.http import JsonResponse
-from django.views import View
-from django.shortcuts import redirect
-from django.conf import settings
-from django.db import transaction
+from users.models          import SocialAccount, User
 
-from users.models import SocialAccount, User
-from core.utils import login_decorator
-from core.views import upload_fileobj, object_delete
-from authors.models import Author
+from utils.login_decorator import login_decorator
+from core.views            import upload_fileobj, object_delete
+
 
 class KakaoLoginView(View):
     def get(self, request):
