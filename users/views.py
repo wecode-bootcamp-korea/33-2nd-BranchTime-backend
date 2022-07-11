@@ -78,6 +78,7 @@ class UserDetailView(View):
         except KeyError:
             return JsonResponse({"message":"KEY ERROR"}, status = 400)    
 
+
 class ProfileUpdate(View):
     @login_decorator
     def post(self, request):

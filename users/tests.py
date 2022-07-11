@@ -67,8 +67,6 @@ class KakaoLoginViewTest(TestCase):
         user    = User.objects.get(id=user_id)
         self.assertEqual(user.email, "abcd@naver.com")
 
-
-
 class UserDetailViewTest(TestCase):
     def setUp(self):
         with transaction.atomic():
@@ -166,89 +164,3 @@ class UserDetailViewTest(TestCase):
         response = client.get('/users/mypage', content_type='application/json', **headers)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"message" : "INVAILD_USER"})        
-
-
-
-class ProfileUpdateTest(TestCase):
-    def setUp(self):
-        with transaction.atomic():
-            User.objects.create(
-                id = 1,
-                name         = "홍길동",
-                email        = "test@gmail.com",
-                thumbnail    = "test.jpg",
-                introduction = "홍길동님의 BranchTime입니다."
-            )
-            SocialAccount.objects.create(
-                        id = 1,
-                        social_account_id = "123123123",
-                        name              = "kakao",
-                        user_id           = 1
-                        )
-        self.token = jwt.encode({'id':1}, settings.SECRET_KEY, settings.ALGORITHM)
-
-    def tearDown(self):
-        User.objects.all().delete()  
-    
-    @patch("core.views.upload_fileobj")
-    def test_post_success_profile_upload(self, mocked_requests):
-        client = Client()
-
-        image = SimpleUploadedFile('python.png', b'') 
-        image._set_name(str(uuid.uuid4())) 
-        Key = "profile/"+str(image)
-
-        class MockedResponse1:
-            def upload_fileobj(Fileobj, Bucket, Key, ExtraArgs):
-                return True
-
-            upload_fileobj(
-                Fileobj= "python.png",
-                Bucket='aws_s3_bucket_name',
-                Key = Key,
-                ExtraArgs=None
-            )
-
-        date = {
-            'name' : "김길동",
-            'description' : "나는 김길동이다.",
-            'image' : image
-        }
-
-        mocked_requests.return_value = MockedResponse1()
-        headers = {"HTTP_Authorization":self.token}
-        response = client.post(reverse("profileupdate"), {"image":date}, content_type = 'image', **headers )
-        self.assertEqual(response.status_code, 201)
-
-
-
-    # @patch("core.views.object_delete")
-    # def test_post_success_profile_upload(self, mocked_requests):
-    #     client = Client()
-    #     headers = {"HTTP_Authorization": self.token}
-    #     image = SimpleUploadedFile('python.png', b'') 
-    #     image._set_name(str(uuid.uuid4())) 
-    #     Key = "profile/"+str(image)
-    #     class MockedResponse1:
-    #         def upload_fileobj(Fileobj, Bucket, Key, ExtraArgs):
-    #             return True
-
-    #         upload_fileobj(
-    #             Fileobj= image,
-    #             Bucket='aws_s3_bucket_name',
-    #             Key = Key,
-    #             ExtraArgs=None
-    #         )
-    #     class MockedResponse2:    
-    #         def object_delete(Key):
-    #             return True
-
-    #         object_delete(
-    #             key = Key
-    #         )    
-
-    #     mocked_requests.return_value = MockedResponse1()
-    #     mocked_requests.return_value = MockedResponse2()
-    #     headers = {"HTTP_Authorization":self.token}
-    #     response = client.post(reverse("profileupdate"), {"image":image}, content_type = 'image', **headers )
-    #     self.assertEqual(response.status_code, 201)
